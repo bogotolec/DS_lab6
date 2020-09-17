@@ -20,10 +20,20 @@ def main():
 		host = sys.argv[2]
 		port = int(sys.argv[3])
 
-		# Send info
+		# Send info and get port to send file
 		sock = socket.socket()
 		sock.connect((host, port))
 		sock.send(filename.encode('utf-8') + b"," + str(filesize).encode('utf-8'))
+		
+		# receive "got data"
+		ok = sock.recv(1024)
+
+		# send end
+		sock.send(b'end')
+
+		# recieve port
+		fileport = int(sock.recv(128).decode('utf-8'))
+		
 		sock.close()
 
 		# Send file
@@ -34,7 +44,7 @@ def main():
 
 		print_progress(0, filesize)
 
-		sock.connect((host, 8801))
+		sock.connect((host, fileport))
 		for i in range(0, filesize, blocksize):
 			data=f.read(blocksize)
 			sock.send(data)
