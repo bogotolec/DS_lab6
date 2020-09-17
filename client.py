@@ -3,6 +3,9 @@ import os
 import socket
 from pathlib import Path
 
+def print_progress(now, total):
+	print("\r" + str(int((now / total) * 100)) + "%", end = "")
+
 def main():
 	# print command line arguments
 	if len(sys.argv) != 4:
@@ -25,9 +28,22 @@ def main():
 
 		# Send file
 		sock = socket.socket()
-		data = open(filename, "rb").read()
+
+		f = open(filename, "rb")
+		blocksize = 1024
+
+		print_progress(0, filesize)
+
 		sock.connect((host, 8801))
-		sock.send(data)
+		for i in range(0, filesize, blocksize):
+			data=f.read(blocksize)
+			sock.send(data)
+			print_progress(i, filesize)
+
+		print_progress(filesize, filesize)
+		print()
+		print("Done")
+
 		sock.close()
 
 if __name__ == "__main__":

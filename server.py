@@ -59,9 +59,7 @@ class FileListener(Thread):
             self._close()
         else:
             originalfilename, size = files[self.addr].pop(0)
-
-            data = self.sock.recv(size + 16)
-
+            
             # Check if file already exists 
             filename = originalfilename
             i = 1
@@ -71,8 +69,14 @@ class FileListener(Thread):
             	filename = ".".join(splitted)
             	i += 1
 
+            # Read and write the file
             f = open(filename, "wb")
-            f.write(data)
+
+            blocksize = 1024
+            for i in range(0, size + 16, blocksize):
+            	data = self.sock.recv(blocksize)
+            	f.write(data)
+
             f.close()
             self._close()
 
